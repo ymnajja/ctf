@@ -1,0 +1,12 @@
+apiVersion: ctf.securinetes.com/v1alpha1
+kind: Cloud
+metadata:
+  labels:
+    app.kubernetes.io/name: cloud
+    app.kubernetes.io/instance: cloud-sample
+    app.kubernetes.io/part-of: op
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: op
+  name: escape
+spec:
+  escape: false

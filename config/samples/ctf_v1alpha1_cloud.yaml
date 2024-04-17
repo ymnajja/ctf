@@ -9,4 +9,4 @@ metadata:
     app.kubernetes.io/created-by: op
   name: escape
 spec:
-  escape: false
+  escape: true

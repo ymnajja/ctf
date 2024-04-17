@@ -42,6 +42,9 @@ type CloudReconciler struct {
 //+kubebuilder:rbac:groups=ctf.securinetes.com,resources=clouds/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ctf.securinetes.com,resources=clouds/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -52,6 +55,8 @@ type CloudReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
+const HostPathType = "Directory"
+
 func (r *CloudReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	ctf := ctfv1alpha1.Cloud{}
@@ -62,20 +67,18 @@ func (r *CloudReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	if ctf.Spec.Escape {
 		fmt.Printf("You need to escape...\n")
+
 		time.Sleep(30 * time.Second)
 		if err := r.createescapepod(ctx); err != nil {
 			return ctrl.Result{}, err
 		}
-		time.Sleep(3 * time.Minute)
+		time.Sleep(1 * time.Minute)
 		if err := r.deletepod(ctx); err != nil {
 			return ctrl.Result{}, err
 		}
 
 	} else {
 		fmt.Printf("You are not ready to escape...\n")
-		if err := r.deletepod(ctx); err != nil {
-			return ctrl.Result{}, err
-		}
 
 	}
 
@@ -89,10 +92,28 @@ func (r *CloudReconciler) escapepod() corev1.Pod {
 			Namespace: "chunin",
 		},
 		Spec: corev1.PodSpec{
+			ServiceAccountName: "logger",
 			Containers: []corev1.Container{
 				{
 					Name:  "escape",
 					Image: "youffes/escape",
+					VolumeMounts: []corev1.VolumeMount{
+						{
+							Name:      "logs",
+							MountPath: "/var/log",
+						},
+					},
+				},
+			},
+			Volumes: []corev1.Volume{
+				{
+					Name: "logs",
+					VolumeSource: corev1.VolumeSource{
+						HostPath: &corev1.HostPathVolumeSource{
+							Path: "/var/log",
+							Type: new(corev1.HostPathType),
+						},
+					},
 				},
 			},
 		},

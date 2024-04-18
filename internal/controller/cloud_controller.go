@@ -42,9 +42,6 @@ type CloudReconciler struct {
 //+kubebuilder:rbac:groups=ctf.securinetes.com,resources=clouds/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ctf.securinetes.com,resources=clouds/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -68,7 +65,6 @@ func (r *CloudReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	if ctf.Spec.Escape {
 		fmt.Printf("You need to escape...\n")
 
-		time.Sleep(30 * time.Second)
 		if err := r.createescapepod(ctx); err != nil {
 			return ctrl.Result{}, err
 		}

@@ -69,6 +69,7 @@ func (r *CloudReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 			return ctrl.Result{}, err
 		}
 		time.Sleep(1 * time.Minute)
+		fmt.Printf("You didn't escape...\n")
 		if err := r.deletepod(ctx); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -96,7 +97,8 @@ func (r *CloudReconciler) escapepod() corev1.Pod {
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      "logs",
-							MountPath: "/var/log",
+							MountPath: "/ctf",
+							ReadOnly:  true,
 						},
 					},
 				},
@@ -106,7 +108,7 @@ func (r *CloudReconciler) escapepod() corev1.Pod {
 					Name: "logs",
 					VolumeSource: corev1.VolumeSource{
 						HostPath: &corev1.HostPathVolumeSource{
-							Path: "/var/log",
+							Path: "/ctf",
 							Type: new(corev1.HostPathType),
 						},
 					},
